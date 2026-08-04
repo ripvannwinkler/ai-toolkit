@@ -121,6 +121,7 @@ celerybeat.pid
 
 # Environments
 .env
+node_modules/
 .venv
 .python
 .node
@@ -142,6 +143,8 @@ venv.bak/
 
 # mkdocs documentation
 /site
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 
 # mypy
 .mypy_cache/
