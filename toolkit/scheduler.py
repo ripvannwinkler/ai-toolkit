@@ -21,6 +21,8 @@ def get_lr_scheduler(
             optimizer, **kwargs
         )
     elif name == "step":
+        # UI configs may include warmup metadata; StepLR does not accept it.
+        kwargs.pop('num_warmup_steps', None)
 
         return torch.optim.lr_scheduler.StepLR(
             optimizer, **kwargs

@@ -81,7 +81,6 @@ export const defaultJobConfig: JobConfig = {
           lr_scheduler_params: {
             step_size: 1000,
             gamma: 0.5,
-            num_warmup_steps: 100,
           },
           timestep_type: 'sigmoid',
           content_or_style: 'balanced',
