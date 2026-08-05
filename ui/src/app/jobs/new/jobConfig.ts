@@ -77,6 +77,12 @@ export const defaultJobConfig: JobConfig = {
           gradient_checkpointing: true,
           noise_scheduler: 'flowmatch',
           optimizer: 'adamw8bit',
+          lr_scheduler: 'constant',
+          lr_scheduler_params: {
+            step_size: 1000,
+            gamma: 0.5,
+            num_warmup_steps: 100,
+          },
           timestep_type: 'sigmoid',
           content_or_style: 'balanced',
           optimizer_params: {

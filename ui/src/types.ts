@@ -141,6 +141,12 @@ export interface TrainConfig {
   timestep_type: string;
   content_or_style: string;
   optimizer: string;
+  lr_scheduler: string;
+  lr_scheduler_params?: {
+    step_size?: number;
+    gamma?: number;
+    num_warmup_steps?: number;
+  };
   lr: number;
   ema_config?: EMAConfig;
   dtype: string;
@@ -298,7 +304,7 @@ export interface CaptionProcessConfig {
     fixed_caption?: string;
     caption_extension?: string;
     thinking?: boolean;
-  }
+  };
 }
 
 export interface CaptionConfigObject {

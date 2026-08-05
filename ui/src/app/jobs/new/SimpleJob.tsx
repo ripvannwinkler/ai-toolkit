@@ -708,6 +708,54 @@ export default function SimpleJob({
                     { value: 'prodigy8bit', label: 'Prodigy8Bit' },
                   ]}
                 />
+                <SelectInput
+                  label="Learning Rate Scheduler"
+                  className="pt-2"
+                  value={jobConfig.config.process[0].train.lr_scheduler}
+                  onChange={value => setJobConfig(value, 'config.process[0].train.lr_scheduler')}
+                  options={[
+                    { value: 'constant', label: 'Constant' },
+                    { value: 'linear', label: 'Linear' },
+                    { value: 'cosine', label: 'Cosine' },
+                    { value: 'cosine_with_restarts', label: 'Cosine with Restarts' },
+                    { value: 'step', label: 'Fixed-Step Decay' },
+                    { value: 'constant_with_warmup', label: 'Constant with Warmup' },
+                  ]}
+                />
+                {jobConfig.config.process[0].train.lr_scheduler === 'step' && (
+                  <>
+                    <NumberInput
+                      label="Decay Every (Steps)"
+                      className="pt-2"
+                      value={jobConfig.config.process[0].train.lr_scheduler_params?.step_size ?? 1000}
+                      onChange={value => setJobConfig(value, 'config.process[0].train.lr_scheduler_params.step_size')}
+                      min={1}
+                      required
+                    />
+                    <NumberInput
+                      label="Decay Factor"
+                      className="pt-2"
+                      value={jobConfig.config.process[0].train.lr_scheduler_params?.gamma ?? 0.5}
+                      onChange={value => setJobConfig(value, 'config.process[0].train.lr_scheduler_params.gamma')}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      required
+                    />
+                  </>
+                )}
+                {jobConfig.config.process[0].train.lr_scheduler === 'constant_with_warmup' && (
+                  <NumberInput
+                    label="Warmup Steps"
+                    className="pt-2"
+                    value={jobConfig.config.process[0].train.lr_scheduler_params?.num_warmup_steps ?? 100}
+                    onChange={value =>
+                      setJobConfig(value, 'config.process[0].train.lr_scheduler_params.num_warmup_steps')
+                    }
+                    min={1}
+                    required
+                  />
+                )}
                 <NumberInput
                   label="Learning Rate"
                   className="pt-2"
