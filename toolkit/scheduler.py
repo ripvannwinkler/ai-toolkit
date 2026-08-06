@@ -9,12 +9,18 @@ def get_lr_scheduler(
         **kwargs,
 ):
     if name == "cosine":
+        kwargs.pop('step_size', None)
+        kwargs.pop('gamma', None)
+        kwargs.pop('num_warmup_steps', None)
         if 'total_iters' in kwargs:
             kwargs['T_max'] = kwargs.pop('total_iters')
         return torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer, **kwargs
         )
     elif name == "cosine_with_restarts":
+        kwargs.pop('step_size', None)
+        kwargs.pop('gamma', None)
+        kwargs.pop('num_warmup_steps', None)
         if 'total_iters' in kwargs:
             kwargs['T_0'] = kwargs.pop('total_iters')
         return torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
@@ -29,16 +35,25 @@ def get_lr_scheduler(
             optimizer, **kwargs
         )
     elif name == "constant":
+        kwargs.pop('step_size', None)
+        kwargs.pop('gamma', None)
+        kwargs.pop('num_warmup_steps', None)
+        kwargs.pop('total_iters', None)
         if 'factor' not in kwargs:
             kwargs['factor'] = 1.0
 
         return torch.optim.lr_scheduler.ConstantLR(optimizer, **kwargs)
     elif name == "linear":
+        kwargs.pop('step_size', None)
+        kwargs.pop('gamma', None)
+        kwargs.pop('num_warmup_steps', None)
 
         return torch.optim.lr_scheduler.LinearLR(
             optimizer, **kwargs
         )
     elif name == 'constant_with_warmup':
+        kwargs.pop('step_size', None)
+        kwargs.pop('gamma', None)
         # see if num_warmup_steps is in kwargs
         if 'num_warmup_steps' not in kwargs:
             print(f"WARNING: num_warmup_steps not in kwargs. Using default value of 1000")
