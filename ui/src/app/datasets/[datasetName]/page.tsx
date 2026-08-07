@@ -127,7 +127,7 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
         <div className="min-w-0 flex-shrink">
           <h1 className="text-base sm:text-lg truncate">
             <span className="hidden sm:inline">Dataset: </span>
-            {datasetName}
+            {datasetName} ({imgList.length} images)
           </h1>
         </div>
         <div className="flex-1"></div>
