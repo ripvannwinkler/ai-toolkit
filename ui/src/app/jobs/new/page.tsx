@@ -28,6 +28,7 @@ export default function TrainingForm() {
   const searchParams = useSearchParams();
   const runId = searchParams.get('id');
   const cloneId = searchParams.get('cloneId');
+  const extendId = searchParams.get('extendId');
   const [gpuIDs, setGpuIDs] = useState<string | null>(null);
   const { settings, isSettingsLoaded } = useSettings();
   const { gpuList, isGPUInfoLoaded } = useGPUInfo();
@@ -120,6 +121,41 @@ export default function TrainingForm() {
     }
   }, [cloneId]);
 
+  // extend existing job (clone + set pretrained_lora_path to last checkpoint)
+  useEffect(() => {
+    if (extendId) {
+      Promise.all([
+        apiClient.get(`/api/jobs?id=${extendId}`).then(res => res.data),
+        apiClient.get(`/api/jobs/${extendId}/files`).then(res => res.data).catch(() => ({ files: [] })),
+      ])
+        .then(([jobData, filesData]: any) => {
+          console.log('Extend Training:', jobData);
+          setGpuIDs(jobData.gpu_ids);
+          const newJobConfig = migrateJobConfig(JSON.parse(jobData.job_config));
+          newJobConfig.config.name = `${newJobConfig.config.name}_extended`;
+
+          // Find the latest checkpoint by ctimeMs (exclude optimizer.pt)
+          const files = filesData?.files || [];
+          const checkpointFiles = files
+            .filter((f: any) => f.path.endsWith('.safetensors'))
+            .sort((a: any, b: any) => (b.ctimeMs || 0) - (a.ctimeMs || 0));
+
+          if (checkpointFiles.length > 0) {
+            const latestCheckpoint = checkpointFiles[0].path;
+            console.log('Setting pretrained_lora_path to:', latestCheckpoint);
+            // Set pretrained_lora_path directly on the config object
+            if (!newJobConfig.config.process[0].network) {
+              newJobConfig.config.process[0].network = {} as any;
+            }
+            (newJobConfig.config.process[0].network as any).pretrained_lora_path = latestCheckpoint;
+          }
+
+          setJobConfig(newJobConfig);
+        })
+        .catch(error => console.error('Error fetching training for extend:', error));
+    }
+  }, [extendId]);
+
   useEffect(() => {
     if (runId) {
       apiClient
@@ -197,7 +233,13 @@ export default function TrainingForm() {
         </div>
         <div className="flex-shrink-0">
           <h1 className="text-base sm:text-lg truncate max-w-[120px] sm:max-w-none">
-            {runId ? 'Edit Training Job' : 'New Training Job'}
+            {runId
+              ? 'Edit Training Job'
+              : extendId
+                ? 'Extend Training Job'
+                : cloneId
+                  ? 'Clone Training Job'
+                  : 'New Training Job'}
           </h1>
         </div>
         <div className="flex-1"></div>

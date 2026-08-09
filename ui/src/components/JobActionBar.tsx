@@ -159,6 +159,17 @@ export default function JobActionBar({
               </Link>
             </MenuItem>
           )}
+          {job.job_type === 'train' && (
+            <MenuItem>
+              <Link
+                href={`/jobs/new?extendId=${job.id}`}
+                className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded flex items-center gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                Extend Job
+              </Link>
+            </MenuItem>
+          )}
           {job.job_type === 'train' && canStop && (
             <MenuItem>
               <div

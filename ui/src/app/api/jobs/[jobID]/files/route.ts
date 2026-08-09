@@ -41,6 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: { jobID: s
       return {
         path: file,
         size: stats.size,
+        ctimeMs: stats.ctimeMs,
       };
     }),
   );
@@ -52,6 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: { jobID: s
     fileObjects.push({
       path: optimizerPath,
       size: stats.size,
+      ctimeMs: stats.ctimeMs,
     });
   } catch {
     // no optimizer state present, skip it
