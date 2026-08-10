@@ -86,7 +86,10 @@ export default function TrainingForm() {
     if (!isSettingsLoaded) return;
     if (datasetFetchStatus !== 'success') return;
 
-    const datasetOptions = datasets.map(name => ({ value: path.join(settings.DATASETS_FOLDER, name), label: name }));
+    const datasetOptions = datasets.map(dataset => ({
+      value: path.join(settings.DATASETS_FOLDER, dataset.name),
+      label: dataset.name,
+    }));
     setDatasetOptions(datasetOptions);
 
     if (datasetOptions.length > 0) {
@@ -126,7 +129,10 @@ export default function TrainingForm() {
     if (extendId) {
       Promise.all([
         apiClient.get(`/api/jobs?id=${extendId}`).then(res => res.data),
-        apiClient.get(`/api/jobs/${extendId}/files`).then(res => res.data).catch(() => ({ files: [] })),
+        apiClient
+          .get(`/api/jobs/${extendId}/files`)
+          .then(res => res.data)
+          .catch(() => ({ files: [] })),
       ])
         .then(([jobData, filesData]: any) => {
           console.log('Extend Training:', jobData);

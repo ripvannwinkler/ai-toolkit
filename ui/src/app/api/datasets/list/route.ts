@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
+import path from 'path';
 import { getDatasetsRoot } from '@/server/settings';
+import { findImagesRecursively } from '@/server/images';
 
 export async function GET() {
   try {
@@ -19,7 +21,24 @@ export async function GET() {
       .filter(dirent => !dirent.name.startsWith('.'))
       .map(dirent => dirent.name);
 
-    return NextResponse.json(folders);
+    // Count the total number of images in each dataset so the list screen can
+    // show per-dataset totals without a second round-trip. Counts are gathered
+    // concurrently to avoid serializing the (potentially slow) recursive walk.
+    const datasets = await Promise.all(
+      folders.map(async name => {
+        const folder = path.join(datasetsPath, name);
+        let count = 0;
+        try {
+          count = (await findImagesRecursively(folder)).length;
+        } catch (err) {
+          // An unreadable dataset shouldn't break the whole list — report 0.
+          console.error(`Failed to count images for dataset '${name}':`, err);
+        }
+        return { name, count };
+      }),
+    );
+
+    return NextResponse.json(datasets);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch datasets' }, { status: 500 });
   }

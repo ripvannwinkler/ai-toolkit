@@ -21,8 +21,9 @@ export default function Datasets() {
 
   // Transform datasets array into rows with objects
   const tableRows = datasets.map(dataset => ({
-    name: dataset,
-    actions: dataset, // Pass full dataset name for actions
+    name: dataset.name,
+    count: dataset.count,
+    actions: dataset.name, // Pass full dataset name for actions
   }));
 
   const columns: TableColumn[] = [
@@ -34,6 +35,12 @@ export default function Datasets() {
           {row.name}
         </Link>
       ),
+    },
+    {
+      title: 'Images',
+      key: 'count',
+      className: 'w-24 text-right tabular-nums',
+      render: row => <span className="text-gray-300">{row.count.toLocaleString()}</span>,
     },
     {
       title: 'Actions',
