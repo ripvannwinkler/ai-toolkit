@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
 
+# Docker Hub user/namespace to publish to
+DOCKER_USER=${DOCKER_USER:-winkler}
+
 VERSION=dev
 GIT_COMMIT=dev
 
-echo "Docker builds from the repo, not this dir. Make sure changes are pushed to the repo."
-echo "Building version: $VERSION"
+echo "Builds from the local working tree (see .dockerignore). No push needed before building."
+echo "Building version: $VERSION (publishing to ${DOCKER_USER})"
 # wait 2 seconds
 sleep 2
 
-# Build the image with cache busting
-docker build --build-arg CACHEBUST=$(date +%s) -t aitoolkit:$VERSION -f docker/Dockerfile .
+# Build the image
+docker build -t aitoolkit:$VERSION -f docker/Dockerfile .
 
 # Tag with version and latest
-docker tag aitoolkit:$VERSION ostris/aitoolkit:$VERSION
+docker tag aitoolkit:$VERSION ${DOCKER_USER}/aitoolkit:$VERSION
 
 # Push both tags
-echo "Pushing images to Docker Hub..."
-docker push ostris/aitoolkit:$VERSION
+echo "Pushing images to Docker Hub (${DOCKER_USER})..."
+docker push ${DOCKER_USER}/aitoolkit:$VERSION
 
-echo "Successfully built and pushed ostris/aitoolkit:$VERSION"
+echo "Successfully built and pushed ${DOCKER_USER}/aitoolkit:$VERSION"

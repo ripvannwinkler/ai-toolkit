@@ -3,6 +3,9 @@
 # Stop immediately on any error so a failed build never gets tagged or pushed
 set -euo pipefail
 
+# Docker Hub user/namespace to publish to
+DOCKER_USER=${DOCKER_USER:-winkler}
+
 # Extract version from version.py
 if [ -f "version.py" ]; then
     VERSION=$(python3 -c "from version import VERSION; print(VERSION)")
@@ -12,21 +15,21 @@ else
     exit 1
 fi
 
-echo "Docker builds from the repo, not this dir. Make sure changes are pushed to the repo."
-echo "Building version: $VERSION and latest"
+echo "Builds from the local working tree (see .dockerignore). No push needed before building."
+echo "Building version: $VERSION and latest (publishing to ${DOCKER_USER})"
 # wait 2 seconds
 sleep 2
 
-# Build the image with cache busting
-docker build --build-arg CACHEBUST=$(date +%s) -t aitoolkit:$VERSION -f docker/Dockerfile .
+# Build the image
+docker build -t aitoolkit:$VERSION -f docker/Dockerfile .
 
 # Tag with version and latest
-docker tag aitoolkit:$VERSION ostris/aitoolkit:$VERSION
-docker tag aitoolkit:$VERSION ostris/aitoolkit:latest
+docker tag aitoolkit:$VERSION ${DOCKER_USER}/aitoolkit:$VERSION
+docker tag aitoolkit:$VERSION ${DOCKER_USER}/aitoolkit:latest
 
 # Push both tags
-echo "Pushing images to Docker Hub..."
-docker push ostris/aitoolkit:$VERSION
-docker push ostris/aitoolkit:latest
+echo "Pushing images to Docker Hub (${DOCKER_USER})..."
+docker push ${DOCKER_USER}/aitoolkit:$VERSION
+docker push ${DOCKER_USER}/aitoolkit:latest
 
-echo "Successfully built and pushed ostris/aitoolkit:$VERSION and ostris/aitoolkit:latest"
+echo "Successfully built and pushed ${DOCKER_USER}/aitoolkit:$VERSION and ${DOCKER_USER}/aitoolkit:latest"

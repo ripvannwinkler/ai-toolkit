@@ -1,0 +1,36 @@
+# Keep the build context small and the image clean of local runtime state.
+# Everything here stays on the host and is never sent to `docker build`.
+
+# VCS / metadata
+.git
+.gitignore
+.dockerignore
+
+# Local runtime data (huge, machine-specific)
+models/
+datasets/
+output/
+jobs/
+aitk_db.db
+aitk_db.db-shm
+aitk_db.db-wal
+
+# Python build artifacts / envs
+__pycache__/
+*.pyc
+.venv/
+
+# Node (node_modules is installed inside the image by npm ci)
+ui/node_modules/
+ui/.next/
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Not needed in the image
+docs/
+notebooks/
+*.md
