@@ -1,7 +1,7 @@
 'use client';
 import { isMac } from '@/helpers/basic';
 import { defaultSampleConfig } from '@/helpers/defaultSamples';
-import { JobConfig, SampleConfig, DatasetConfig, SliderConfig } from '@/types';
+import { type JobConfig, SampleConfig, type DatasetConfig, type SliderConfig } from '@/types';
 
 export const defaultDatasetConfig: DatasetConfig = {
   folder_path: '/path/to/images/folder',
@@ -101,6 +101,7 @@ export const defaultJobConfig: JobConfig = {
           diff_output_preservation: false,
           diff_output_preservation_multiplier: 1.0,
           diff_output_preservation_class: 'person',
+          diff_output_preservation_interval: 1,
           switch_boundary_every: 1,
           loss_type: 'mse',
         },
@@ -137,7 +138,7 @@ export const migrateJobConfig = (jobConfig: JobConfig): JobConfig => {
     Array.isArray(jobConfig.config.process[0].sample.prompts) &&
     jobConfig.config.process[0].sample.prompts.length > 0
   ) {
-    let newSamples = [];
+    const newSamples = [];
     for (const prompt of jobConfig.config.process[0].sample.prompts) {
       newSamples.push({
         prompt: prompt,
@@ -159,7 +160,7 @@ export const migrateJobConfig = (jobConfig: JobConfig): JobConfig => {
   }
 
   if (!('logging' in jobConfig.config.process[0])) {
-    //@ts-ignore
+    //@ts-expect-error
     jobConfig.config.process[0].logging = {
       log_every: 1,
       use_ui_logger: true,

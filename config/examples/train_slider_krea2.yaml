@@ -1,0 +1,99 @@
+# Krea 2 TURBO — areola/nipple DETAIL slider
+#   low  (-1) = smooth, ghost-like
+#   high (+1) = textured, natural bumps (Montgomery glands)
+#
+# Target: RTX 5090 32GB · Ostris AI Toolkit
+# Aligned to the proven Krea 2 Turbo LoRA configs in output/ (same model block,
+# assistant training adapter, convrot8 quant, flow-match, near-zero-CFG sampling).
+#
+# Slider hyperparameters (per Ostris):
+#   * steps ~1/10 of a full LoRA (400 vs 4000) — fit a DIRECTION, not a concept
+#   * lr 1e-3 with adamw8bit
+#   * weighted timesteps + STYLE bias (favors late / low-noise steps -> detail/texture)
+#   * save & sample every 25 so you can stop at the sweet spot before overfitting
+#
+# Poles come from PAIRED DATA: pos_folder = textured, neg_folder = smooth
+# (build with scripts/gen_nipple_poles.py — same seed per pair, neutral captions).
+
+job: extension
+config:
+  name: "krea2_nipple_detail_slider_v1"
+  process:
+    - type: 'ultimate_slider_trainer'
+      training_folder: "output"
+      device: cuda
+      network:
+        type: lora
+        linear: 16            # proven Krea2 rank; drop to 8 if the slider overfits
+        linear_alpha: 16
+      save:
+        dtype: bf16
+        save_every: 25
+        max_step_saves_to_keep: 8
+        save_format: diffusers
+      train:
+        batch_size: 1
+        steps: 400            # ~1/10 of a full LoRA (slider = a direction, not a concept)
+        gradient_accumulation: 1
+        train_unet: true
+        train_text_encoder: false      # Krea2 freezes the Qwen3-VL text encoder
+        gradient_checkpointing: true
+        noise_scheduler: flowmatch
+        optimizer: adamw8bit
+        lr: 1.0e-3           # Ostris slider LR (pairs with adamw8bit); lower (e.g. 3e-4) if it overshoots
+        lr_scheduler: constant
+        timestep_type: weighted       # Ostris: weighted timesteps
+        content_or_style: style       # Ostris: low-noise/style bias -> favors late/detail steps
+        optimizer_params:
+          weight_decay: 0.0001
+        cache_text_embeddings: true
+        attention_backend: flash
+        loss_type: mse
+        dtype: bf16
+      model:
+        name_or_path: krea/Krea-2-Turbo
+        arch: krea2:turbo
+        quantize: true
+        qtype: convrot8
+        quantize_te: true
+        qtype_te: qfloat8
+        low_vram: true
+        model_kwargs: {}
+        compile: false
+        # Required for Krea 2 Turbo training (training / de-distillation adapter).
+        # Merged in and held at multiplier -1.0 during training, inverted out at inference.
+        assistant_lora_path: ostris/krea2_turbo_training_adapter/krea2_turbo_training_adapter_v1.safetensors
+      sample:
+        sampler: flowmatch
+        sample_every: 25
+        sample_start_step: 0
+        width: 1024
+        height: 1024
+        prompts:
+          - "close-up photograph of a woman's bare chest, soft diffused studio light"
+          - "boudoir close-up, woman's chest and areola, warm window light"
+          - "close-up of a woman's chest, deep skin tone, golden hour rim light"
+        neg: ''
+        seed: 42
+        walk_seed: true
+        guidance_scale: 1         # Turbo is distilled -> near-zero CFG (matches proven configs)
+        sample_steps: 9           # Turbo few-step (matches proven configs)
+        network_multiplier: 1.0   # after training, sweep -1..+1 to inspect the slider
+      slider:
+        datasets:
+          - pos_folder: "datasets/krea2_nipple/pos"
+            neg_folder: "datasets/krea2_nipple/neg"
+            target_class: "close-up photograph of a woman's bare chest, areola and nipples"
+            size: 1024
+            network_weight: 1.0
+            pos_weight: 1.0
+            neg_weight: 1.0
+meta:
+  name: "[name]"
+  description: "Krea 2 Turbo slider: areola/nipple detail (-1 smooth/ghost .. +1 textured/natural)"
+  trigger_words: []
+  version: "0.1"
+
+# NOTE: if you'd rather NOT build pole folders, swap the process to 'concept_slider'
+# (one neutral dataset + positive/negative prompts derive the direction in-model).
+# See extensions_built_in/concept_slider for that variant.

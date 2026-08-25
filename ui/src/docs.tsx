@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConfigDoc } from '@/types';
+import type { ConfigDoc } from '@/types';
 import { IoFlaskSharp } from 'react-icons/io5';
 
 const docs: { [key: string]: ConfigDoc } = {
@@ -227,7 +227,7 @@ const docs: { [key: string]: ConfigDoc } = {
     description: (
       <>
         This is an experimental feature based on{' '}
-        <a className="text-blue-500" href="https://github.com/lodestone-rock/RamTorch" target="_blank">
+        <a className="text-blue-500" href="https://github.com/lodestone-rock/RamTorch" target="_blank" rel="noopener">
           RamTorch
         </a>
         . This feature is early and will have many updates and changes, so be aware it may not work consistently from
@@ -272,6 +272,18 @@ const docs: { [key: string]: ConfigDoc } = {
         step with this prior prediction and the class prompt in order to teach our LoRA to preserve the knowledge of the
         class. This should not only improve the performance of your trained concept, but also allow you to do things
         like "Alice standing next to a woman" and not make both of the people look like Alice.
+      </>
+    ),
+  },
+  'train.diff_output_preservation_interval': {
+    title: 'DOP Step Interval',
+    description: (
+      <>
+        Differential Output Preservation adds an extra prior prediction and an extra training pass on every step,
+        which roughly doubles the time per step. With this interval you can run those extra passes only every Nth
+        step instead. For example, an interval of 2 runs DOP every other step, cutting most of the extra cost while
+        keeping most of the preservation benefit since it acts as a regularizer. The default of 1 runs DOP on every
+        step.
       </>
     ),
   },

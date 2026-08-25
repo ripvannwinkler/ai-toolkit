@@ -2,15 +2,15 @@
 import { useMemo } from 'react';
 import {
   modelArchs,
-  ModelArch,
+  type ModelArch,
   groupedModelOptions,
   quantizationOptions,
   defaultQtype,
   jobTypeOptions,
-  SampleTags,
+  type SampleTags,
 } from './options';
 import { defaultCompileOptions, defaultDatasetConfig } from './jobConfig';
-import { GroupedSelectOption, JobConfig, SelectOption } from '@/types';
+import type { GroupedSelectOption, JobConfig, SelectOption } from '@/types';
 import { objectCopy, tagsToObj, objToTags } from '@/utils/basic';
 import {
   TextInput,
@@ -87,7 +87,7 @@ export default function SimpleJob({
     if (!modelArch) return null;
     if (!modelArch.sampleTags) return null;
     if (!jobConfig.config.process[0].sample.samples) return null;
-    let sampleArr: any[] = [];
+    const sampleArr: any[] = [];
     for (let i = 0; i < jobConfig.config.process[0].sample.samples.length; i++) {
       const taggedPrompt = jobConfig.config.process[0].sample.samples[i].prompt;
       const tagsObj = tagsToObj(taggedPrompt);
@@ -99,7 +99,7 @@ export default function SimpleJob({
   const modelArchTagSections: SampleTags[] | null = useMemo(() => {
     if (!modelArch?.sampleTags) return null;
     const maxPerGroup = 5;
-    let sections: SampleTags[] = [];
+    const sections: SampleTags[] = [];
     let subSection: SampleTags = {};
     for (const [tagKey, tag] of Object.entries(modelArch.sampleTags)) {
       if ((tag.full && Object.keys(subSection).length > 0) || Object.keys(subSection).length >= maxPerGroup) {
@@ -162,7 +162,7 @@ export default function SimpleJob({
     if (!hasARA) {
       return quantizationOptions;
     }
-    let newQuantizationOptions = [
+    const newQuantizationOptions = [
       {
         label: 'Standard',
         options: [quantizationOptions[0], quantizationOptions[1]],
@@ -170,7 +170,7 @@ export default function SimpleJob({
     ];
 
     // add ARAs if they exist for the model
-    let ARAs: SelectOption[] = [];
+    const ARAs: SelectOption[] = [];
     if (modelArch.accuracyRecoveryAdapters) {
       for (const [label, value] of Object.entries(modelArch.accuracyRecoveryAdapters)) {
         ARAs.push({ value, label });
@@ -183,7 +183,7 @@ export default function SimpleJob({
       });
     }
 
-    let additionalQuantizationOptions: SelectOption[] = [];
+    const additionalQuantizationOptions: SelectOption[] = [];
     // add the quantization options if they are not already included
     for (let i = 2; i < quantizationOptions.length; i++) {
       const option = quantizationOptions[i];
@@ -918,12 +918,23 @@ export default function SimpleJob({
                         />
                         <TextInput
                           label="DOP Preservation Class"
-                          className="pt-2 pb-4"
+                          className="pt-2"
                           value={jobConfig.config.process[0].train.diff_output_preservation_class as string}
                           onChange={value =>
                             setJobConfig(value, 'config.process[0].train.diff_output_preservation_class')
                           }
                           placeholder="eg. woman"
+                        />
+                        <NumberInput
+                          label="DOP Step Interval"
+                          className="pt-2 pb-4"
+                          docKey={'train.diff_output_preservation_interval'}
+                          value={jobConfig.config.process[0].train.diff_output_preservation_interval ?? 1}
+                          onChange={value =>
+                            setJobConfig(value ?? 1, 'config.process[0].train.diff_output_preservation_interval')
+                          }
+                          placeholder="eg. 2"
+                          min={1}
                         />
                       </>
                     )}
@@ -1139,7 +1150,7 @@ export default function SimpleJob({
                   className="pt-1"
                   checked={jobConfig.config.process[0].train.do_differential_guidance || false}
                   onChange={value => {
-                    let newValue = value == false ? undefined : value;
+                    const newValue = value == false ? undefined : value;
                     setJobConfig(newValue, 'config.process[0].train.do_differential_guidance');
                     if (!newValue) {
                       setJobConfig(undefined, 'config.process[0].train.differential_guidance_scale');
@@ -1358,10 +1369,10 @@ export default function SimpleJob({
                             label="Do Audio"
                             checked={dataset.do_audio || false}
                             onChange={value => {
-                              if (!value) {
-                                setJobConfig(undefined, `config.process[0].datasets[${i}].do_audio`);
-                              } else {
+                              if (value) {
                                 setJobConfig(value, `config.process[0].datasets[${i}].do_audio`);
+                              } else {
+                                setJobConfig(undefined, `config.process[0].datasets[${i}].do_audio`);
                               }
                             }}
                             docKey="datasets.do_audio"
@@ -1372,10 +1383,10 @@ export default function SimpleJob({
                             label="Audio Normalize"
                             checked={dataset.audio_normalize || false}
                             onChange={value => {
-                              if (!value) {
-                                setJobConfig(undefined, `config.process[0].datasets[${i}].audio_normalize`);
-                              } else {
+                              if (value) {
                                 setJobConfig(value, `config.process[0].datasets[${i}].audio_normalize`);
+                              } else {
+                                setJobConfig(undefined, `config.process[0].datasets[${i}].audio_normalize`);
                               }
                             }}
                             docKey="datasets.audio_normalize"
@@ -1386,10 +1397,10 @@ export default function SimpleJob({
                             label="Audio Preserve Pitch"
                             checked={dataset.audio_preserve_pitch || false}
                             onChange={value => {
-                              if (!value) {
-                                setJobConfig(undefined, `config.process[0].datasets[${i}].audio_preserve_pitch`);
-                              } else {
+                              if (value) {
                                 setJobConfig(value, `config.process[0].datasets[${i}].audio_preserve_pitch`);
+                              } else {
+                                setJobConfig(undefined, `config.process[0].datasets[${i}].audio_preserve_pitch`);
                               }
                             }}
                             docKey="datasets.audio_preserve_pitch"
@@ -1671,7 +1682,7 @@ export default function SimpleJob({
                                         label={tag.title}
                                         value={taggedSampleArr[i][tagKey] ?? ''}
                                         onChange={value => {
-                                          let taggedSample = { ...taggedSampleArr[i] };
+                                          const taggedSample = { ...taggedSampleArr[i] };
                                           taggedSample[tagKey] = value;
                                           setJobConfig(
                                             objToTags(taggedSample),
@@ -1686,7 +1697,7 @@ export default function SimpleJob({
                                         label={tag.title}
                                         value={taggedSampleArr[i][tagKey] ?? ''}
                                         onChange={value => {
-                                          let taggedSample = { ...taggedSampleArr[i] };
+                                          const taggedSample = { ...taggedSampleArr[i] };
                                           taggedSample[tagKey] = value;
                                           setJobConfig(
                                             objToTags(taggedSample),
@@ -1701,7 +1712,7 @@ export default function SimpleJob({
                                         label={tag.title}
                                         value={taggedSampleArr[i][tagKey] ?? ''}
                                         onChange={value => {
-                                          let taggedSample = { ...taggedSampleArr[i] };
+                                          const taggedSample = { ...taggedSampleArr[i] };
                                           taggedSample[tagKey] = value;
                                           setJobConfig(
                                             objToTags(taggedSample),
@@ -1773,7 +1784,7 @@ export default function SimpleJob({
                                 value = value.replace(/\D/g, '');
                                 if (value === '') {
                                   // remove the key from the config if empty
-                                  let newConfig = objectCopy(jobConfig);
+                                  const newConfig = objectCopy(jobConfig);
                                   if (newConfig.config.process[0].sample.samples[i]) {
                                     delete newConfig.config.process[0].sample.samples[i].width;
                                     setJobConfig(
@@ -1783,10 +1794,10 @@ export default function SimpleJob({
                                   }
                                 } else {
                                   const intValue = parseInt(value);
-                                  if (!isNaN(intValue)) {
-                                    setJobConfig(intValue, `config.process[0].sample.samples[${i}].width`);
-                                  } else {
+                                  if (isNaN(intValue)) {
                                     console.warn('Invalid width value:', value);
+                                  } else {
+                                    setJobConfig(intValue, `config.process[0].sample.samples[${i}].width`);
                                   }
                                 }
                               }}
@@ -1802,7 +1813,7 @@ export default function SimpleJob({
                                 value = value.replace(/\D/g, '');
                                 if (value === '') {
                                   // remove the key from the config if empty
-                                  let newConfig = objectCopy(jobConfig);
+                                  const newConfig = objectCopy(jobConfig);
                                   if (newConfig.config.process[0].sample.samples[i]) {
                                     delete newConfig.config.process[0].sample.samples[i].height;
                                     setJobConfig(
@@ -1812,10 +1823,10 @@ export default function SimpleJob({
                                   }
                                 } else {
                                   const intValue = parseInt(value);
-                                  if (!isNaN(intValue)) {
-                                    setJobConfig(intValue, `config.process[0].sample.samples[${i}].height`);
-                                  } else {
+                                  if (isNaN(intValue)) {
                                     console.warn('Invalid height value:', value);
+                                  } else {
+                                    setJobConfig(intValue, `config.process[0].sample.samples[${i}].height`);
                                   }
                                 }
                               }}
@@ -1830,7 +1841,7 @@ export default function SimpleJob({
                               value = value.replace(/\D/g, '');
                               if (value === '') {
                                 // remove the key from the config if empty
-                                let newConfig = objectCopy(jobConfig);
+                                const newConfig = objectCopy(jobConfig);
                                 if (newConfig.config.process[0].sample.samples[i]) {
                                   delete newConfig.config.process[0].sample.samples[i].seed;
                                   setJobConfig(
@@ -1840,10 +1851,10 @@ export default function SimpleJob({
                                 }
                               } else {
                                 const intValue = parseInt(value);
-                                if (!isNaN(intValue)) {
-                                  setJobConfig(intValue, `config.process[0].sample.samples[${i}].seed`);
-                                } else {
+                                if (isNaN(intValue)) {
                                   console.warn('Invalid seed value:', value);
+                                } else {
+                                  setJobConfig(intValue, `config.process[0].sample.samples[${i}].seed`);
                                 }
                               }
                             }}
@@ -1857,7 +1868,7 @@ export default function SimpleJob({
                               value = value.replace(/[^0-9.-]/g, '');
                               if (value === '') {
                                 // remove the key from the config if empty
-                                let newConfig = objectCopy(jobConfig);
+                                const newConfig = objectCopy(jobConfig);
                                 if (newConfig.config.process[0].sample.samples[i]) {
                                   delete newConfig.config.process[0].sample.samples[i].network_multiplier;
                                   setJobConfig(
@@ -1885,12 +1896,12 @@ export default function SimpleJob({
                                 className=""
                                 src={sample[ctrlKey as keyof typeof sample] as string}
                                 onNewImageSelected={imagePath => {
-                                  if (!imagePath) {
-                                    let newSamples = objectCopy(jobConfig.config.process[0].sample.samples);
+                                  if (imagePath) {
+                                    setJobConfig(imagePath, `config.process[0].sample.samples[${i}].${ctrlKey}`);
+                                  } else {
+                                    const newSamples = objectCopy(jobConfig.config.process[0].sample.samples);
                                     delete newSamples[i][ctrlKey as keyof typeof sample];
                                     setJobConfig(newSamples, 'config.process[0].sample.samples');
-                                  } else {
-                                    setJobConfig(imagePath, `config.process[0].sample.samples[${i}].${ctrlKey}`);
                                   }
                                 }}
                               />
@@ -1903,12 +1914,12 @@ export default function SimpleJob({
                           className="mt-6 ml-4"
                           src={sample.ctrl_img}
                           onNewImageSelected={imagePath => {
-                            if (!imagePath) {
-                              let newSamples = objectCopy(jobConfig.config.process[0].sample.samples);
+                            if (imagePath) {
+                              setJobConfig(imagePath, `config.process[0].sample.samples[${i}].ctrl_img`);
+                            } else {
+                              const newSamples = objectCopy(jobConfig.config.process[0].sample.samples);
                               delete newSamples[i].ctrl_img;
                               setJobConfig(newSamples, 'config.process[0].sample.samples');
-                            } else {
-                              setJobConfig(imagePath, `config.process[0].sample.samples[${i}].ctrl_img`);
                             }
                           }}
                         />
