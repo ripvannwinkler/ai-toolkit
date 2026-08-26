@@ -914,6 +914,7 @@ class DatasetConfig:
     """
 
     def __init__(self, **kwargs):
+        self.batch_size: Union[int, None] = kwargs.get('batch_size', None)
         self.type = kwargs.get('type', 'image')  # sd, slider, reference
         # will be legacy
         self.folder_path: str = kwargs.get('folder_path')
